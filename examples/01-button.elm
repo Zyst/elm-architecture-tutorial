@@ -1,3 +1,5 @@
+module Main exposing (Model, Msg(..), init, main, update, view)
+
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)

@@ -55,6 +55,8 @@ generatePair msg =
 
 -- TODO: Have the dice flip around randomly before they settle on a final value.
 -- Do this once you understand Elm a bit better
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
