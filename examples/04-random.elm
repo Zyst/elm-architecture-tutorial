@@ -26,13 +26,14 @@ main =
 
 
 type alias Model =
-    { dieFace : Int
+    { firstDieFace : Int
+    , secondDieFace : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 1
+    ( Model 1 1
     , Cmd.none
     )
 
@@ -43,7 +44,7 @@ init _ =
 
 type Msg
     = Roll
-    | NewFace Int
+    | NewFace ( Int, Int )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,11 +52,12 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewFace (Random.int 1 6)
+            , Random.generate NewFace
+                (Random.pair (Random.int 1 6) (Random.int 1 6))
             )
 
-        NewFace newFace ->
-            ( Model newFace
+        NewFace ( firstDice, secondDice ) ->
+            ( Model firstDice secondDice
             , Cmd.none
             )
 
@@ -73,9 +75,23 @@ subscriptions model =
 -- VIEW
 
 
-createDiceFace : Int -> List (Svg msg)
-createDiceFace face =
+createDice : Int -> List (Svg msg)
+createDice face =
     let
+        rectangle =
+            rect
+                -- This here is what I want to append it after
+                [ x "10"
+                , y "10"
+                , width "130"
+                , height "130"
+                , rx "20"
+                , ry "20"
+                , fill "white"
+                , stroke "black"
+                ]
+                []
+
         center =
             circle
                 [ cx "75"
@@ -123,28 +139,32 @@ createDiceFace face =
     in
     case face of
         1 ->
-            [ center ]
+            [ rectangle, center ]
 
         2 ->
-            [ topLeft
+            [ rectangle
+            , topLeft
             , bottomRight
             ]
 
         3 ->
-            [ topLeft
+            [ rectangle
+            , topLeft
             , center
             , bottomRight
             ]
 
         4 ->
-            [ topLeft
+            [ rectangle
+            , topLeft
             , topRight
             , bottomLeft
             , bottomRight
             ]
 
         5 ->
-            [ topLeft
+            [ rectangle
+            , topLeft
             , topRight
             , center
             , bottomLeft
@@ -152,7 +172,8 @@ createDiceFace face =
             ]
 
         6 ->
-            [ topLeft
+            [ rectangle
+            , topLeft
             , topRight
             , bottomLeft
             , bottomRight
@@ -173,7 +194,8 @@ createDiceFace face =
             ]
 
         _ ->
-            [ circle
+            [ rectangle
+            , circle
                 [ r "0"
                 ]
                 []
@@ -181,32 +203,19 @@ createDiceFace face =
 
 
 view : Model -> Html Msg
-view { dieFace } =
-    let
-        rectangle =
-            [ rect
-                -- This here is what I want to append it after
-                [ x "10"
-                , y "10"
-                , width "130"
-                , height "130"
-                , rx "20"
-                , ry "20"
-                , fill "white"
-                , stroke "black"
-                ]
-                []
-            ]
-    in
+view { firstDieFace, secondDieFace } =
     div []
         [ svg
             [ width "150"
             , height "150"
             , viewBox "0 0 150 150"
             ]
-            (List.append
-                rectangle
-                (createDiceFace dieFace)
-            )
+            (createDice firstDieFace)
+        , svg
+            [ width "150"
+            , height "150"
+            , viewBox "0 0 150 150"
+            ]
+            (createDice secondDieFace)
         , button [ onClick Roll ] [ Html.text "Roll" ]
         ]
