@@ -47,14 +47,19 @@ type Msg
     | NewFace ( Int, Int )
 
 
+generatePair msg =
+    Random.generate msg
+        (Random.pair (Random.int 1 6) (Random.int 1 6))
+
+
+
+-- TODO: Have the dice flip around randomly before they settle on a final value.
+-- Do this once you understand Elm a bit better
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Roll ->
-            ( model
-            , Random.generate NewFace
-                (Random.pair (Random.int 1 6) (Random.int 1 6))
-            )
+            ( model, generatePair NewFace )
 
         NewFace ( firstDice, secondDice ) ->
             ( Model firstDice secondDice
