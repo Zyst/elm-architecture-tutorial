@@ -4,6 +4,8 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
+import Svg exposing (circle, line, svg)
+import Svg.Attributes exposing (cx, cy, fill, height, r, stroke, viewBox, width, x1, x2, y1, y2)
 import Task
 import Time
 
@@ -98,6 +100,47 @@ zeroPad string goal =
         String.repeat (goal - length) "0" ++ string
 
 
+createClock { time } =
+    svg
+        [ width "150"
+        , height "150"
+        , viewBox "0 0 150 150"
+        ]
+        [ circle
+            [ cx "75"
+            , cy "75"
+            , width "130"
+            , height "130"
+            , fill "white"
+            , stroke "black"
+            , r "65"
+            ]
+            []
+        , circle
+            [ cx "75"
+            , cy "75"
+            , r "1.5"
+            ]
+            []
+        -- , line
+        --     [ x1 "75"
+        --     , y1 "75"
+        --     , x2 "75"
+        --     , y2 "20"
+        --     , stroke "black"
+        --     ]
+        --     []
+        , line
+            [ x1 "75"
+            , y1 "75"
+            , x2 "20"
+            , y2 "75"
+            , stroke "red"
+            ]
+            []
+        ]
+
+
 view : Model -> Html Msg
 view model =
     let
@@ -124,6 +167,7 @@ view model =
             , style "padding" "20px"
             ]
             [ text (hour ++ ":" ++ minute ++ ":" ++ second) ]
+        , createClock model
         , button
             [ onClick TogglePause ]
             [ text buttonText ]
