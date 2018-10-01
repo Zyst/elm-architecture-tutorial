@@ -125,16 +125,18 @@ view : Model -> Html Msg
 view model =
     div []
         [ h2 [] [ text model.topic ]
-        , input
-            [ type_ "text"
-            , placeholder "topic"
-            , value model.topic
+        , select
+            [ value model.topic
             , onInput Topic
             ]
-            []
+            [ option [ value "dog" ] [ text "dog" ]
+            , option [ value "cat" ] [ text "cat" ]
+            , option [ value "horse" ] [ text "horse" ]
+            , option [ value "cow" ] [ text "cow" ]
+            ]
         , p [] [ text model.error ]
         , button [ onClick MorePlease ] [ text "More Please!" ]
-        , br [] []
+        , hr [] []
         , img [ src model.url ] []
         ]
 
