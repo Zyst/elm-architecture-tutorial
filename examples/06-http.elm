@@ -29,13 +29,14 @@ main =
 type alias Model =
     { topic : String
     , url : String
+    , error : String
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model "cat" "waiting.gif"
-    , getRandomGif "cat"
+    ( Model "dog" "waiting.gif" "Loading"
+    , getRandomGif "dog"
     )
 
 
@@ -59,14 +60,46 @@ update msg model =
         NewGif result ->
             case result of
                 Ok newUrl ->
-                    ( { model | url = newUrl }
+                    ( { model | url = newUrl, error = "" }
                     , Cmd.none
                     )
 
-                Err _ ->
-                    ( model
-                    , Cmd.none
-                    )
+                Err err ->
+                    case err of
+                        Http.BadUrl _ ->
+                            ( { model
+                                | error = "We did not provide a valid URL"
+                              }
+                            , Cmd.none
+                            )
+
+                        Http.Timeout ->
+                            ( { model
+                                | error = "The server took too long to respond"
+                              }
+                            , Cmd.none
+                            )
+
+                        Http.NetworkError ->
+                            ( { model
+                                | error = "Network error ocurred, please try again"
+                              }
+                            , Cmd.none
+                            )
+
+                        Http.BadStatus _ ->
+                            ( { model
+                                | error = "Server responded an error"
+                              }
+                            , Cmd.none
+                            )
+
+                        Http.BadPayload _ _ ->
+                            ( { model
+                                | error = "Server responded with a bad payload"
+                              }
+                            , Cmd.none
+                            )
 
 
 
@@ -86,9 +119,10 @@ view : Model -> Html Msg
 view model =
     div []
         [ h2 [] [ text model.topic ]
-        , button [ onClick MorePlease ] [ text "More Please!" ]
-        , br [] []
+        , p [] [ text model.error ]
         , img [ src model.url ] []
+        , hr [] []
+        , button [ onClick MorePlease ] [ text "More Please!" ]
         ]
 
 
