@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Svg exposing (circle, line, svg)
-import Svg.Attributes exposing (cx, cy, fill, height, r, stroke, viewBox, width, x1, x2, y1, y2)
+import Svg.Attributes exposing (cx, cy, fill, height, r, stroke, strokeWidth, viewBox, width, x1, x2, y1, y2)
 import Task
 import Time
 
@@ -100,15 +100,74 @@ zeroPad string goal =
         String.repeat (goal - length) "0" ++ string
 
 
-createClock { time } =
+type alias Coordinates =
+    { x : Float
+    , y : Float
+    }
+
+
+rotateClockwiseByDegrees : Float -> Coordinates -> Coordinates
+rotateClockwiseByDegrees d { x, y } =
+    Coordinates
+        ((x * cos (degrees d)) - (y * sin (degrees d)))
+        ((x * sin (degrees d)) + (y * cos (degrees d)))
+
+
+createSecondsCoordinates : Model -> Coordinates
+createSecondsCoordinates { zone, time } =
+    let
+        pointingUp =
+            Coordinates 0 -55
+
+        secondsInDegrees =
+            toFloat (Time.toSecond zone time * 6)
+    in
+    rotateClockwiseByDegrees secondsInDegrees pointingUp
+
+
+createMinutesCoordinates : Model -> Coordinates
+createMinutesCoordinates { zone, time } =
+    let
+        pointingUp =
+            Coordinates 0 -60
+
+        minutesInDegrees =
+            toFloat (Time.toMinute zone time * 6)
+    in
+    rotateClockwiseByDegrees minutesInDegrees pointingUp
+
+
+createHourCoordinates : Model -> Coordinates
+createHourCoordinates { zone, time } =
+    let
+        pointingUp =
+            Coordinates 0 -35
+
+        hoursInDegrees =
+            toFloat (modBy 12 (Time.toHour zone time) * 30)
+    in
+    rotateClockwiseByDegrees hoursInDegrees pointingUp
+
+
+createClock model =
+    let
+        secondsHand =
+            createSecondsCoordinates model
+
+        minutesHand =
+            createMinutesCoordinates model
+
+        hoursHand =
+            createHourCoordinates model
+    in
     svg
         [ width "150"
         , height "150"
-        , viewBox "0 0 150 150"
+        , viewBox "-75 -75 150 150"
         ]
         [ circle
-            [ cx "75"
-            , cy "75"
+            [ cx "0"
+            , cy "0"
             , width "130"
             , height "130"
             , fill "white"
@@ -117,24 +176,40 @@ createClock { time } =
             ]
             []
         , circle
-            [ cx "75"
-            , cy "75"
+            [ cx "0"
+            , cy "0"
             , r "1.5"
             ]
             []
-        -- , line
-        --     [ x1 "75"
-        --     , y1 "75"
-        --     , x2 "75"
-        --     , y2 "20"
-        --     , stroke "black"
-        --     ]
-        --     []
+
+        -- Hours
         , line
-            [ x1 "75"
-            , y1 "75"
-            , x2 "20"
-            , y2 "75"
+            [ x1 "0"
+            , y1 "0"
+            , x2 (String.fromFloat hoursHand.x)
+            , y2 (String.fromFloat hoursHand.y)
+            , stroke "black"
+            , strokeWidth "1.5"
+            ]
+            []
+
+        -- Minutes
+        , line
+            [ x1 "0"
+            , y1 "0"
+            , x2 (String.fromFloat minutesHand.x)
+            , y2 (String.fromFloat minutesHand.y)
+            , stroke "black"
+            , strokeWidth "1.5"
+            ]
+            []
+
+        -- Seconds
+        , line
+            [ x1 "0"
+            , y1 "0"
+            , x2 (String.fromFloat secondsHand.x)
+            , y2 (String.fromFloat secondsHand.y)
             , stroke "red"
             ]
             []
